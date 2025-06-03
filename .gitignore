@@ -1,0 +1,75 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pdb
+*.egg
+*.egg-info/
+*.eggs/
+dist/
+build/
+pip-wheel-metadata/
+*.manifest
+*.spec
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+*.env
+*.env.*
+
+# FastAPI static and template cache (if used)
+staticfiles/
+templates_c/
+
+# VSCode project settings
+.vscode/
+
+# Logs and databases
+*.log
+*.sqlite3
+*.db
+*.db-journal
+*.pid
+
+# Coverage and testing
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pydantic schema cache
+__pydantic__/  
+
+# Uvicorn reload watch file (if used)
+reload.lock
+
+# Docker
+*.pid
+*.seed
+*.pid.lock
+docker-compose.override.yml
+
+# Jupyter notebooks
+.ipynb_checkpoints
+
+# Mac / Windows
+.DS_Store
+Thumbs.db
