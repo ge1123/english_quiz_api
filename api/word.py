@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from typing import List, Optional
 from models.schema import WordItem, QuizRequest, QuizQuestion
-from services.word_service import get_words_by_level, get_random_question
+from services.word_service import get_words_by_level, get_random_question, get_word_bank
 from sqlalchemy.ext.asyncio import AsyncSession
 from db.async_connection import get_async_session
 from services.auth import get_current_user
@@ -24,6 +24,15 @@ async def random_quiz(
     current_user: str = Depends(get_current_user),  # ✅ 這行會強制驗證
 ):
     return await get_random_question(payload, session)
+
+
+@router.post("/bank", response_model=list[WordItem])
+async def word_bank(
+    payload: QuizRequest = Body(...),
+    session: AsyncSession = Depends(get_async_session),
+    current_user: str = Depends(get_current_user),  # ✅ 這行會強制驗證
+):
+    return await get_word_bank(payload, session)
 
 
 @router.get("/save-correct")
