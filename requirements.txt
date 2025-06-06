@@ -30,3 +30,10 @@ typing-inspection==0.4.1 ; python_version >= "3.13"
 uvicorn==0.34.3 ; python_version >= "3.13"
 watchfiles==1.0.5 ; python_version >= "3.13"
 websockets==15.0.1 ; python_version >= "3.13"
+
+SQLAlchemy~=2.0.41
+fastapi~=0.115.12
+pydantic~=2.11.5
+aioodbc~=0.5.0
+passlib~=1.7.4
+python-jose~=3.5.0
