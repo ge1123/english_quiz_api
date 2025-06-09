@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import List, Optional
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, DateTime, ForeignKey, String
+from sqlalchemy.sql import func
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
@@ -14,6 +15,15 @@ class WordList(Base):
     EnglishWord = Column(String)
     ChineseMeaning = Column(String)
     Level = Column(Integer)
+
+
+class WordCorrectLog(Base):
+    __tablename__ = "WordCorrectLog"
+
+    Id = Column(Integer, primary_key=True, index=True)
+    WordId = Column(Integer, ForeignKey("WordList.Id"), nullable=False)
+    UserId = Column(Integer, nullable=True)
+    AnsweredAt = Column(DateTime, server_default=func.getdate(), nullable=False)
 
 
 class WordItem(BaseModel):
@@ -33,3 +43,8 @@ class QuizQuestion(BaseModel):
     isAnswerIncluded: bool
     correct: str
     level: int
+
+
+class QuizCorrectRequest(BaseModel):
+    wordId: int = []
+    userId: int = []

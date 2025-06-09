@@ -1,3 +1,5 @@
+from typing import Any
+
 from db.async_connection import get_async_session
 from models.user import User, RegisterRequest
 from services.auth import (
@@ -12,7 +14,6 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-
 router = APIRouter()
 
 
@@ -24,10 +25,14 @@ class LoginRequest(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+    user_id: int
 
 
 @router.post("/login", response_model=TokenResponse)
-async def login(data: LoginRequest, session: AsyncSession = Depends(get_async_session)):
+async def login(
+        data: LoginRequest,
+        session: AsyncSession = Depends(get_async_session)
+) -> TokenResponse:
     stmt = select(User).where(User.username == data.username)
     result = await session.execute(stmt)
     user = result.scalar_one_or_none()
@@ -42,13 +47,17 @@ async def login(data: LoginRequest, session: AsyncSession = Depends(get_async_se
         data={"sub": user.username},
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     )
-    return {"access_token": token}
+    return TokenResponse(
+        access_token=token,
+        user_id=user.id
+    )
 
 
 @router.post("/register", status_code=201)
 async def register_user(
-    data: RegisterRequest, session: AsyncSession = Depends(get_async_session)
-):
+        data: RegisterRequest,
+        session: AsyncSession = Depends(get_async_session)
+) -> dict[str, str | int]:
     # 檢查帳號是否已存在
     stmt = select(User).where(User.username == data.username)
     result = await session.execute(stmt)

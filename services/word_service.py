@@ -1,12 +1,19 @@
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
-from models.schema import WordItem, QuizRequest, QuizQuestion
-from models.schema import WordList
+from models.schema import (
+    WordItem,
+    WordList,
+    QuizRequest,
+    QuizQuestion,
+    WordCorrectLog)
 from fastapi import HTTPException
 import random
 
 
-async def get_words_by_level(level: int, session: AsyncSession):
+async def get_words_by_level(
+        level: int,
+        session: AsyncSession
+) -> list[WordItem]:
     try:
         stmt = select(WordList)
         if level is not None:
@@ -27,14 +34,18 @@ async def get_words_by_level(level: int, session: AsyncSession):
         raise HTTPException(status_code=500, detail=f"讀取單字失敗: {e}")
 
 
-def _split_rows_by_area(rows: list, area: list[int], group_count: int) -> list:
+def _split_rows_by_area(
+        rows: list,
+        area: list[int],
+        group_count: int
+) -> list:
     total_rows = len(rows)
     rows_per_area = total_rows // group_count
     chunks = [
-        rows[i * rows_per_area : (i + 1) * rows_per_area]
+        rows[i * rows_per_area: (i + 1) * rows_per_area]
         for i in range(group_count - 1)
     ]
-    chunks.append(rows[(group_count - 1) * rows_per_area :])  # 最後一組吃掉剩下的
+    chunks.append(rows[(group_count - 1) * rows_per_area:])  # 最後一組吃掉剩下的
 
     filtered_rows = []
     for a in area:
@@ -45,7 +56,9 @@ def _split_rows_by_area(rows: list, area: list[int], group_count: int) -> list:
 
 
 async def get_random_question(
-    payload: QuizRequest, session: AsyncSession, area_group_count: int = 10
+        payload: QuizRequest,
+        session: AsyncSession,
+        area_group_count: int = 10
 ) -> QuizQuestion:
     level = payload.level or []
     area = payload.area or []
@@ -100,7 +113,9 @@ async def get_random_question(
 
 
 async def get_word_bank(
-    payload: QuizRequest, session: AsyncSession, area_group_count: int = 30
+        payload: QuizRequest,
+        session: AsyncSession,
+        area_group_count: int = 30
 ) -> list[dict]:
     level = payload.level or [1]
     area = payload.area or []
@@ -132,3 +147,17 @@ async def get_word_bank(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"題庫取得失敗: {e}")
+
+
+async def log_correct_answer(
+        word_id: int,
+        user_id: int | None,
+        session: AsyncSession
+) -> None:
+    try:
+        log = WordCorrectLog(WordId=word_id, UserId=user_id)
+        session.add(log)
+        await session.commit()
+    except Exception as e:
+        await session.rollback()
+        raise HTTPException(status_code=500, detail=f"記錄答對失敗: {e}")
