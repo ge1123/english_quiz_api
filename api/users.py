@@ -1,81 +1,27 @@
-from typing import Any
-
-from db.async_connection import get_async_session
-from models.user import User, RegisterRequest
-from services.auth import (
-    verify_password,
-    create_access_token,
-    ACCESS_TOKEN_EXPIRE_MINUTES,
-)
-from datetime import timedelta
-from services.auth import hash_password
-from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
+from fastapi import APIRouter, Depends
+from dependencies.service_provider import get_auth_service
+from services.auth_service import AuthService
+from schemas.user import LoginRequest, RegisterRequest, TokenResponse
 
 router = APIRouter()
-
-
-class LoginRequest(BaseModel):
-    username: str
-    password: str
-
-
-class TokenResponse(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
-    user_id: int
 
 
 @router.post("/login", response_model=TokenResponse)
 async def login(
         data: LoginRequest,
-        session: AsyncSession = Depends(get_async_session)
+        auth_service: AuthService = Depends(get_auth_service)
 ) -> TokenResponse:
-    stmt = select(User).where(User.username == data.username)
-    result = await session.execute(stmt)
-    user = result.scalar_one_or_none()
-
-    if not user or not verify_password(data.password, user.hashed_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-        )
-
-    token = create_access_token(
-        data={"sub": user.username},
-        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
-    )
+    token, user_id = await auth_service.login(data.username, data.password)
     return TokenResponse(
         access_token=token,
-        user_id=user.id
+        user_id=user_id
     )
 
 
 @router.post("/register", status_code=201)
 async def register_user(
         data: RegisterRequest,
-        session: AsyncSession = Depends(get_async_session)
+        auth_service: AuthService = Depends(get_auth_service)
 ) -> dict[str, str | int]:
-    # 檢查帳號是否已存在
-    stmt = select(User).where(User.username == data.username)
-    result = await session.execute(stmt)
-    existing_user = result.scalar_one_or_none()
-
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username already registered",
-        )
-
-    # 建立新使用者
-    new_user = User(
-        username=data.username, hashed_password=hash_password(data.password)
-    )
-
-    session.add(new_user)
-    await session.commit()
-    await session.refresh(new_user)
-
-    return {"msg": "User registered successfully", "user_id": new_user.id}
+    user_id = await auth_service.register(data)
+    return {"msg": "User registered successfully", "user_id": user_id}
