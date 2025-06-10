@@ -13,31 +13,28 @@ router = APIRouter()
 @router.get("", response_model=List[WordItem])
 async def get_words(
         level: Optional[int] = None,
-        session: AsyncSession = Depends(get_async_session),
         word_service: WordService = Depends(get_word_service)
 
 ) -> list[WordItem]:
-    return await word_service.get_words_by_level(level, session)
+    return await word_service.get_words_by_level(level)
 
 
 @router.post("/random", response_model=QuizQuestion)
 async def random_quiz(
         payload: QuizRequest = Body(...),
-        session: AsyncSession = Depends(get_async_session),
         current_user: str = Depends(get_current_user),  # ✅ 這行會強制驗證
         word_service: WordService = Depends(get_word_service)
 ) -> QuizQuestion:
-    return await word_service.get_random_question(payload, session)
+    return await word_service.get_random_question(payload)
 
 
 @router.post("/bank", response_model=list[WordItem])
 async def word_bank(
         payload: QuizRequest = Body(...),
-        session: AsyncSession = Depends(get_async_session),
         current_user: str = Depends(get_current_user),  # ✅ 這行會強制驗證
         word_service: WordService = Depends(get_word_service)
 ) -> list[dict]:
-    return await word_service.get_word_bank(payload, session)
+    return await word_service.get_word_bank(payload)
 
 
 @router.post("/save-correct")
