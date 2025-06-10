@@ -1,24 +1,20 @@
+from models import User
 from datetime import timedelta
 from fastapi import HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from models import User
 from schemas.user import RegisterRequest
 from utils.security import hash_password, verify_password
 from utils.jwt_helper import create_access_token
+from repositories.user_repository import UserRepository
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
 class AuthService:
-    def __init__(self, session: AsyncSession):
-        self.session = session
+    def __init__(self, user_repo: UserRepository):
+        self.user_repo = user_repo
 
     async def login(self, username: str, password: str) -> tuple[str, int]:
-        stmt = select(User).where(User.username == username)
-        result = await self.session.execute(stmt)
-        user = result.scalar_one_or_none()
-
+        user = await self.user_repo.get_by_username(username)
         if not user or not verify_password(password, user.hashed_password):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -32,10 +28,7 @@ class AuthService:
         return token, user.id
 
     async def register(self, data: RegisterRequest) -> int:
-        stmt = select(User).where(User.username == data.username)
-        result = await self.session.execute(stmt)
-        existing_user = result.scalar_one_or_none()
-
+        existing_user = await self.user_repo.get_by_username(data.username)
         if existing_user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -46,9 +39,5 @@ class AuthService:
             username=data.username,
             hashed_password=hash_password(data.password)
         )
-
-        self.session.add(new_user)
-        await self.session.commit()
-        await self.session.refresh(new_user)
-
-        return new_user.id
+        user = await self.user_repo.add(new_user)
+        return user.id

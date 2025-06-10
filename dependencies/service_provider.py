@@ -1,12 +1,14 @@
 from fastapi import Depends
-from db.async_connection import get_async_session
+from repositories.word_repository import WordRepository
 from services.auth_service import AuthService
 from services.word_service import WordService
+from repositories.user_repository import UserRepository
+from dependencies.repository_provider import get_user_repository, get_word_repository
 
 
-def get_auth_service(session=Depends(get_async_session)) -> AuthService:
-    return AuthService(session)
+def get_auth_service(user_repo: UserRepository = Depends(get_user_repository)) -> AuthService:
+    return AuthService(user_repo)
 
 
-def get_word_service(session=Depends(get_async_session)) -> WordService:
-    return WordService(session)
+def get_word_service(word_repo: WordRepository = Depends(get_word_repository)) -> WordService:
+    return WordService(word_repo)
