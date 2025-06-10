@@ -2,7 +2,8 @@ from datetime import timedelta
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from models.user import User, RegisterRequest
+from models import User
+from schemas.user import RegisterRequest
 from utils.security import hash_password, verify_password
 from utils.jwt_helper import create_access_token
 

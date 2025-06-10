@@ -1,10 +1,12 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from models.schema import (
+from schemas.word import (
     WordItem,
-    WordList,
     QuizRequest,
     QuizQuestion,
+)
+from models import (
+    WordList,
     WordCorrectLog
 )
 from fastapi import HTTPException

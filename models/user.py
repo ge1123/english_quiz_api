@@ -1,8 +1,5 @@
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
-from pydantic import BaseModel
-
-Base = declarative_base()
+from .base import Base
 
 
 class User(Base):
@@ -11,8 +8,3 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(50), unique=True, nullable=False, index=True)
     hashed_password = Column(String(255), nullable=False)
-
-
-class RegisterRequest(BaseModel):
-    username: str
-    password: str
