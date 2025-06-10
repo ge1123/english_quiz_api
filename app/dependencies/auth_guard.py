@@ -1,7 +1,7 @@
 from fastapi import HTTPException, Security, status
 from fastapi.security import APIKeyHeader
 from jose import JWTError
-from utils.jwt_helper import decode_token
+from app.utils.jwt_helper import decode_token
 
 api_key_header = APIKeyHeader(name="Authorization", auto_error=False)
 

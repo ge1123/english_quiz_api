@@ -1,7 +1,7 @@
 from fastapi import Depends
-from db.async_connection import get_async_session
-from repositories.user_repository import UserRepository
-from repositories.word_repository import WordRepository
+from app.db.async_connection import get_async_session
+from app.repositories.user_repository import UserRepository
+from app.repositories.word_repository import WordRepository
 
 
 def get_user_repository(session=Depends(get_async_session)) -> UserRepository:

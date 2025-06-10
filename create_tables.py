@@ -1,7 +1,7 @@
 # create_tables.py
 import asyncio
 from sqlalchemy.ext.asyncio import create_async_engine
-from models.user import Base
+from app.models.user import Base
 from urllib.parse import quote_plus
 
 dsn = (

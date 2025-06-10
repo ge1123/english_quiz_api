@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from models import WordList, WordCorrectLog
+from app.models import WordList, WordCorrectLog
 
 
 class WordRepository:

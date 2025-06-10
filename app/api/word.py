@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, Body
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from db.async_connection import get_async_session
-from dependencies.service_provider import get_word_service
-from dependencies.auth_guard import get_current_user
-from services.word_service import WordService
-from schemas.word import QuizCorrectRequest, QuizRequest, QuizQuestion, WordItem
+from app.db.async_connection import get_async_session
+from app.dependencies.service_provider import get_word_service
+from app.dependencies.auth_guard import get_current_user
+from app.services.word_service import WordService
+from app.schemas.word import QuizCorrectRequest, QuizRequest, QuizQuestion, WordItem
 
 router = APIRouter()
 

@@ -1,11 +1,11 @@
-from schemas.word import (
+from app.schemas.word import (
     WordItem,
     QuizRequest,
     QuizQuestion,
 )
 from fastapi import HTTPException
 import random
-from repositories.word_repository import WordRepository
+from app.repositories.word_repository import WordRepository
 
 
 class WordService:

@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api import word
-from api import users
+from app.api import word, users
 
 app = FastAPI(title="English Quiz API (Async)")
 

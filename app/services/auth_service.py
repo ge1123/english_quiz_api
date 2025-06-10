@@ -1,10 +1,10 @@
-from models import User
+from app.models import User
 from datetime import timedelta
 from fastapi import HTTPException, status
-from schemas.user import RegisterRequest
-from utils.security import hash_password, verify_password
-from utils.jwt_helper import create_access_token
-from repositories.user_repository import UserRepository
+from app.schemas.user import RegisterRequest
+from app.utils.security import hash_password, verify_password
+from app.utils.jwt_helper import create_access_token
+from app.repositories.user_repository import UserRepository
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
