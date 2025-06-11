@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
-from app.dependencies.service_provider import get_auth_service
-from app.services.auth_service import AuthService
+from app.dependencies.services import get_auth_service
+from app.services.user import AuthService
 from app.schemas.user import LoginRequest, RegisterRequest, TokenResponse
 
 router = APIRouter()

@@ -5,7 +5,7 @@ from app.schemas.word import (
 )
 from fastapi import HTTPException
 import random
-from app.repositories.word_repository import WordRepository
+from app.crud.word import WordRepository
 
 
 class WordService:

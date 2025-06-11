@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 from app.schemas.user import RegisterRequest
 from app.utils.security import hash_password, verify_password
 from app.utils.jwt_helper import create_access_token
-from app.repositories.user_repository import UserRepository
+from app.crud.user import UserRepository
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 

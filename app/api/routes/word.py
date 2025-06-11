@@ -1,11 +1,9 @@
 from fastapi import APIRouter, Depends, Body
 from typing import List, Optional
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.async_connection import get_async_session
-from app.dependencies.service_provider import get_word_service
-from app.dependencies.auth_guard import get_current_user
-from app.services.word_service import WordService
+from app.dependencies.services import get_word_service
+from app.services.word import WordService
 from app.schemas.word import QuizCorrectRequest, QuizRequest, QuizQuestion, WordItem
+from app.api.deps import get_current_user
 
 router = APIRouter()
 
@@ -40,7 +38,6 @@ async def word_bank(
 @router.post("/save-correct")
 async def save_correct_answer(
         payload: QuizCorrectRequest = Body(...),
-        session: AsyncSession = Depends(get_async_session),
         word_service: WordService = Depends(get_word_service)
 ) -> None:
     return await word_service.log_correct_answer(payload.wordId, payload.userId, session)
