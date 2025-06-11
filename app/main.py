@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import word, users
+from app.api import router
 
-app = FastAPI(title="English Quiz API (Async)")
+app = FastAPI(title="English Quiz API")
 
 # 開啟 CORS，允許前端跨域請求
 app.add_middleware(
@@ -14,6 +14,4 @@ app.add_middleware(
 )
 
 # 掛載路由
-app.include_router(word.router, prefix="/api/words", tags=["Word Quiz"])
-app.include_router(users.router, prefix="/api/users", tags=["User Auth"])
-# app.include_router(users.router, prefix="/api/register", tags=["User Auth"])
+app.include_router(router)
