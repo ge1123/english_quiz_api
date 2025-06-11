@@ -1,6 +1,6 @@
 # 🧠 English Word Quiz API
 
-使用 [FastAPI](https://fastapi.tiangolo.com/) 建立的英文字彙練習 API，並透過 [Poetry](https://python-poetry.org/) 管理專案依賴與虛擬環境。
+使用 [FastAPI](https://fastapi.tiangolo.com/) 開發的英文字彙練習系統，結合 [Poetry](https://python-poetry.org/) 管理專案依賴與虛擬環境，具備清晰的模組分層架構，方便維護與擴充。
 
 ---
 
@@ -30,14 +30,6 @@
 
 ---
 
-### ✅ 初始化專案（已有 `pyproject.toml` 可略過）
-
-```bash
-    poetry init
-```
-
----
-
 ### ✅ 安裝專案依賴
 
 ```bash
@@ -52,34 +44,34 @@
     poetry shell
 ```
 
-或使用傳統方式（若有手動建立 `.venv`）：
+或（若使用 in-project `.venv`）：
 
 ```powershell
-.\venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
 ```
 
 ---
 
-## 🚀 執行 FastAPI 開發伺服器
+### ✅ 啟動 FastAPI 應用（使用 `run.py`）
 
 ```bash
-    uvicorn main:app --reload
+    python scripts/run.py
 ```
 
 ---
 
 ## 🔍 API 測試與文件
 
-- Swagger UI: http://127.0.0.1:8000/docs
-- ReDoc: http://127.0.0.1:8000/redoc
+- Swagger UI: http://127.0.0.1:8019/docs
+- ReDoc: http://127.0.0.1:8019/redoc
 
 ---
 
-## 🧹 開發建議工具（自動格式化 / Import 排序）
+## 🧹 開發建議工具（格式化 / import 排序）
 
-專案推薦使用以下工具搭配開發：
+專案推薦使用以下開發工具：
 
-### ✅ 安裝開發依賴（若尚未安裝）
+### ✅ 安裝開發依賴（如尚未安裝）
 
 ```bash
     poetry add --dev black isort
@@ -92,7 +84,7 @@
     poetry run isort .
 ```
 
-### ✅ 推薦的 `pyproject.toml` 設定
+### ✅ 推薦 pyproject.toml 設定
 
 ```toml
 [tool.black]
@@ -104,17 +96,44 @@ profile = "black"
 line_length = 100
 ```
 
-你也可以在 PyCharm 中透過 File Watcher 設定儲存時自動格式化。
+---
+
+## 📁 專案結構（依照 FastAPI 生態圈標準分層）
+
+```
+english_word/
+├── app/
+│   ├── main.py                # FastAPI 啟動點
+│   ├── api/                   # 路由模組（包含 routes 與 deps）
+│   ├── core/                  # 設定與環境讀取（如 config.py）
+│   ├── db/                    # 資料庫 session 設定
+│   ├── crud/                  # CRUD 操作（對應資料表）
+│   ├── models/                # SQLAlchemy ORM 模型
+│   ├── schemas/               # Pydantic schema 定義
+│   ├── services/              # 商業邏輯服務層
+│   ├── dependencies/          # Depends 注入來源（db, service, crud）
+│   └── utils/                 # 工具類函式（如 JWT）
+├── scripts/
+│   ├── run.py                 # 專案啟動腳本
+│   └── create_tables.py       # 建立資料表用
+├── test/                      # 測試模組
+├── .env                       # 環境變數設定檔
+├── .gitignore
+├── poetry.lock
+├── pyproject.toml
+├── README.md
+└── requirements.txt
+```
+
+---
 
 ## 🎁 Bonus：匯出 requirements.txt（for pip 使用）
 
-### ✅ 安裝 `poetry-plugin-export`（只需一次）
+### ✅ 安裝 export plugin（只需一次）
 
 ```bash
     poetry self add poetry-plugin-export
 ```
-
----
 
 ### ✅ 匯出 `requirements.txt`
 
@@ -122,7 +141,7 @@ line_length = 100
     poetry export -f requirements.txt --output requirements.txt --without-hashes
 ```
 
-這會將目前 `pyproject.toml` 中定義的套件（不含 hash）匯出成 `requirements.txt`，可供部署或在非 Poetry 環境中使用：
+這可讓部署或 CI/CD 環境使用：
 
 ```bash
     pip install -r requirements.txt
@@ -130,25 +149,6 @@ line_length = 100
 
 ---
 
-📌 建議在 CI/CD 或部署腳本中自動執行 `poetry export`，確保 pip 環境能正確對應 Poetry 專案。
----
-
-## 📁 專案結構建議
-
-```
-english_word/
-├── app/
-│   ├── main.py              # FastAPI 入口
-│   ├── models/              # Pydantic 資料模型
-│   └── services/            # 商業邏輯處理
-├── .venv/                   # Poetry 虛擬環境（若使用 in-project 模式）
-├── pyproject.toml           # Poetry 設定檔
-├── README.md
-└── requirements.txt         # 可選：相容 pip 環境
-```
-
----
-
 ## 📜 授權
 
-MIT License © 2025 
+MIT License © 2025
