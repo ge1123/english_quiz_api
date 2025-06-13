@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import router
 from app.middleware.cors import add_cors
 from app.middleware.logging import log_requests
