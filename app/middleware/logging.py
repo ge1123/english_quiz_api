@@ -1,8 +1,9 @@
 from starlette.types import ASGIApp, Receive, Scope, Send
 from starlette.requests import Request
-from starlette.responses import Response
 from loguru import logger
 import time
+import json
+
 
 class LoggingMiddleware:
     def __init__(self, app: ASGIApp):
@@ -13,13 +14,33 @@ class LoggingMiddleware:
             await self.app(scope, receive, send)
             return
 
-        request = Request(scope, receive)
+        body_bytes = b""
+        more_body = True
+
+        # 🧠 收集完整 body
+        async def receive_body():
+            nonlocal body_bytes, more_body
+            while more_body:
+                message = await receive()
+                if message["type"] == "http.request":
+                    body_bytes += message.get("body", b"")
+                    more_body = message.get("more_body", False)
+
+        await receive_body()
+
+        # 🧠 用來餵回原本的 body 給 FastAPI
+        async def receive_wrapper():
+            return {"type": "http.request", "body": body_bytes, "more_body": False}
+
+        request = Request(scope, receive_wrapper)
         start = time.time()
         request_id = getattr(request.state, "request_id", "MISSING")
 
+        # 🧠 解析 JSON body
         try:
-            if request.headers.get("content-type", "").startswith("application/json"):
-                body = await request.json()
+            content_type = request.headers.get("content-type", "").lower()
+            if content_type.startswith("application/json"):
+                body = json.loads(body_bytes.decode("utf-8"))
             else:
                 body = None
         except Exception:
@@ -49,4 +70,4 @@ class LoggingMiddleware:
 
             await send(message)
 
-        await self.app(scope, receive, send_wrapper)
+        await self.app(scope, receive_wrapper, send_wrapper)

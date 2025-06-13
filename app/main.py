@@ -20,9 +20,9 @@ app = FastAPI(title="English Quiz API")
 
 
 # 註冊 middleware
-# app.add_middleware(RequestIDMiddleware)   # 產生 request_id 並掛入 request.state
 add_cors(app)  # 開啟 CORS 支援
-# app.add_middleware(LoggingMiddleware)
+app.add_middleware(LoggingMiddleware)
+app.add_middleware(RequestIDMiddleware)   # 產生 request_id 並掛入 request.state
 
 app.add_exception_handler(StarletteHTTPException, http_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
