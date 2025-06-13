@@ -1,43 +1,52 @@
+from starlette.types import ASGIApp, Receive, Scope, Send
 from starlette.requests import Request
 from starlette.responses import Response
 from loguru import logger
 import time
 
+class LoggingMiddleware:
+    def __init__(self, app: ASGIApp):
+        self.app = app
 
-async def log_requests(request: Request, call_next):
-    start = time.time()
+    async def __call__(self, scope: Scope, receive: Receive, send: Send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
 
-    # 嘗試讀取 Request body（限 JSON，避免洩露敏感資料）
-    body = None
-    try:
-        if request.headers.get("content-type", "").startswith("application/json"):
-            body = await request.json()
-    except Exception:
-        body = None
+        request = Request(scope, receive)
+        start = time.time()
+        request_id = getattr(request.state, "request_id", "MISSING")
 
-    # 執行主邏輯，取得 Response
-    response: Response = await call_next(request)
-    duration = round(time.time() - start, 4)
+        try:
+            if request.headers.get("content-type", "").startswith("application/json"):
+                body = await request.json()
+            else:
+                body = None
+        except Exception:
+            body = None
 
-    # 基本 meta 資訊
-    log_data = {
-        "method": request.method,
-        "url": str(request.url),
-        "status": response.status_code,
-        "duration": f"{duration}s",
-        "content_type": response.headers.get("content-type", ""),
-    }
+        async def send_wrapper(message):
+            if message["type"] == "http.response.start":
+                duration = round(time.time() - start, 4)
+                log_data = {
+                    "request_id": request_id,
+                    "method": request.method,
+                    "url": str(request.url),
+                    "status": message.get("status", 0),
+                    "duration": f"{duration}s",
+                    "content_type": request.headers.get("content-type", ""),
+                }
 
-    # 若是 DEBUG 等級，顯示 request body
-    if body is not None:
-        logger.debug(f"Request body: {body}")
+                if body:
+                    logger.bind(request_id=request_id).debug(f"Request body: {body}")
 
-    # 根據 status 決定 log 等級
-    if response.status_code >= 500:
-        logger.error(f"Server Error: {log_data}")
-    elif response.status_code >= 400:
-        logger.warning(f"Client Error: {log_data}")
-    else:
-        logger.info(f"Request Info: {log_data}")
+                if log_data["status"] >= 500:
+                    logger.bind(request_id=request_id).error(f"Server Error: {log_data}")
+                elif log_data["status"] >= 400:
+                    logger.bind(request_id=request_id).warning(f"Client Error: {log_data}")
+                else:
+                    logger.bind(request_id=request_id).info(f"Request Info: {log_data}")
 
-    return response
+            await send(message)
+
+        await self.app(scope, receive, send_wrapper)
