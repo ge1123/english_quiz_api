@@ -13,11 +13,12 @@ class QuizQuestion(BaseModel):
     isAnswerIncluded: bool
     correct: str
     level: int
+    wordId: int
 
 
 class QuizCorrectRequest(BaseModel):
-    wordId: int = []
-    userId: int = []
+    wordId: int
+    userId: int
 
 
 class WordItem(BaseModel):

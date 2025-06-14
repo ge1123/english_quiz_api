@@ -79,6 +79,7 @@ class WordService:
                 isAnswerIncluded=include_answer,
                 correct=correct_zh,
                 level=correct_level,
+                wordId= next((x.Id for x in rows if x.EnglishWord == correct_en), None)
             )
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"題目生成失敗: {e}")
